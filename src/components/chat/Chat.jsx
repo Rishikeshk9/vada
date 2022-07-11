@@ -19,19 +19,19 @@ const Chat = () => {
     async function init() {
       const providerOptions = {
         /* See Provider Options Section */
-        // walletconnect: {
-        //   package: WalletConnectProvider, // required
-        //   options: {
-        //     infuraId: "27e484dcd9e3efcfd25a83a78777cdf1", // required
-        //   },
-        // },
+        walletconnect: {
+           package: WalletConnectProvider, // required
+          options: {
+             infuraId: "27e484dcd9e3efcfd25a83a78777cdf1", // required
+          },
+        },
       };
 
       const web3Modal = new Web3Modal({
         network: "mainnet", // optional
         cacheProvider: false, // optional
         providerOptions, // required
-        // disableInjectedProvider: true,
+         disableInjectedProvider: true,
       });
 
       setWeb3Modal(web3Modal);
