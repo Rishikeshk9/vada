@@ -7,12 +7,16 @@ import Web3Modal from "web3modal";
 import { ethers, providers } from "ethers";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import ChatBubble from "./ChatBubble";
+// Import `connect` from the Tableland library
+import { connect } from "@tableland/sdk";
+
 const Chat = () => {
   const [message, setMessage] = useState("");
   const [wallet, setWallet] = useState(null);
   const [web3Modal, setWeb3Modal] = useState(null);
   const [xmtp, setXmtp] = useState(null);
   const [chatHistory, setChatHistory] = useState([]);
+  const [receipient, setReceipient] = useState("");
   let conversation = null;
 
   useEffect(() => {
@@ -41,7 +45,7 @@ const Chat = () => {
   }, []);
 
   useEffect(() => {
-    fetchConversations();
+    //fetchConversations();
   }, [xmtp]);
 
   async function fetchConversations() {
@@ -53,7 +57,8 @@ const Chat = () => {
           startTime: new Date(new Date().setDate(new Date().getDate() - 1)),
           endTime: new Date(),
         };
-        setChatHistory(await conversation.messages(opts));
+        console.log(conversation);
+        //setChatHistory(await conversation.messages(opts));
       }
   }
 
@@ -88,11 +93,38 @@ const Chat = () => {
     });
   }
 
+  async function createGroup() {
+    const randomWallet = Wallet.createRandom();
+
+    console.log(randomWallet.address);
+
+    const xmtp = await Client.create(randomWallet);
+
+    // // Start a conversation with Vitalik
+    conversation = await xmtp.conversations.newConversation(wallet);
+    await conversation.send("Welcome to the group");
+
+    const messages = await conversation.messages();
+    console.log(await messages);
+  }
+
+  async function fetchMsgs() {
+    if (xmtp)
+      for (const conversation of await xmtp.conversations.list()) {
+        // All parameters are optional and can be omitted
+        const opts = {
+          // Only show messages from last 24 hours
+          startTime: new Date(new Date().setDate(new Date().getDate() - 1)),
+          endTime: new Date(),
+        };
+        console.log(conversation);
+        //setChatHistory(await conversation.messages(opts));
+      }
+  }
+
   async function sendMessage() {
     // Start a conversation with Vitalik
-    conversation = await xmtp.conversations.newConversation(
-      "0x520E101aA4cc262cB50642C8317E5b0FC01D0459"
-    );
+    conversation = await xmtp.conversations.newConversation(receipient);
 
     // Load all messages in the conversation
     const messages = await conversation.messages();
@@ -109,7 +141,7 @@ const Chat = () => {
   }
   return (
     <div className="flex flex-col">
-      <div className="flex bg-xmtp-blue p-2 w-full fixed top-0">
+      <div className="flex bg-xmtp-blue p-2 w-full fixed top-0 items-center">
         <div className="   ">
           {wallet ? (
             wallet
@@ -118,11 +150,33 @@ const Chat = () => {
               className="bg-white p-3 rounded-full cursor-pointer hover:shadow-md"
               onClick={connectWallet}
             >
+              {" "}
               connect
             </div>
           )}
         </div>
+        <div
+          className="bg-slate-100 px-3 rounded-full cursor-pointer"
+          onClick={createGroup}
+        >
+          Create New Group
+        </div>
+        <div className="mx-4 flex bg-slate-300 w-full h-12 rounded-full  align-middle content-center items-center">
+          <input
+            placeholder="Receipient Address"
+            value={receipient}
+            onChange={(e) => setReceipient(e.target.value)}
+            className="w-full rounded-full h-full p-6 focus:border-xtmtp-blue focus:outline-none"
+          ></input>
+        </div>
+        <div
+          className="bg-slate-100 px-2 py-2 w-full flex cursor-pointer"
+          onClick={fetchMsgs}
+        >
+          Fetch New Chats{" "}
+        </div>
       </div>
+
       <div className="flex flex-col mb-24">
         {chatHistory.map((message, index) => {
           return (
