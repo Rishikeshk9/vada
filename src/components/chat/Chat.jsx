@@ -29,7 +29,7 @@ const Chat = () => {
 
       const web3Modal = new Web3Modal({
         network: "mainnet", // optional
-        cacheProvider: false, // optional
+        cacheProvider: true, // optional
         providerOptions, // required
         // disableInjectedProvider: true,
       });
@@ -101,11 +101,11 @@ const Chat = () => {
     await conversation.send(message);
     setMessage(""); // Clear the message input
 
-    // // Listen for new messages in the conversation
-    // for await (const txt of await conversation.streamMessages()) {
-    //   console.log(txt);
-    //   console.log(txt.content);
-    // }
+    // Listen for new messages in the conversation
+    for await (const txt of await conversation.streamMessages()) {
+      console.log(txt);
+      console.log(txt.content);
+    }
   }
   return (
     <div className="flex flex-col">
